@@ -1,0 +1,88 @@
+// ---------------------------------------------------------------------
+// Design tokens — "night instrumentation" palette: a deep navy control
+// room with a single cyan signal color. Built for this SPC dashboard,
+// not a generic dark theme.
+// ---------------------------------------------------------------------
+:root {
+  --bg-deep: #060b1e;      // page background
+  --bg-panel: #0d1836;     // chart card surface
+  --bg-panel-raised: #132145; // hovered / dialog surface
+  --line-subtle: #1e2c56;  // borders, gridlines
+  --line-strong: #2c3d70;
+
+  --text-primary: #e8ecfb;
+  --text-muted: #8b9bd1;
+  --text-faint: #5b6aa0;
+
+  --signal-cyan: #4fc3ff;    // in-control trace
+  --signal-cyan-dim: rgba(79, 195, 255, 0.18);
+  --signal-red: #ff5d78;     // breach / limit lines
+  --signal-red-dim: rgba(255, 93, 120, 0.16);
+  --signal-amber: #f5b342;   // warning state
+
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  --font-display: 'Space Grotesk', 'Inter', sans-serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-deep);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(79, 195, 255, 0.08), transparent);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+::selection {
+  background: var(--signal-cyan-dim);
+}
+
+// Scrollbar tuned to the dark theme
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border-radius: 8px;
+}
+
+// Angular Material dark overrides scoped globally so Material components
+// (select, dialog, buttons) match the navy instrumentation palette.
+.mat-mdc-form-field {
+  --mdc-outlined-text-field-outline-color: var(--line-strong);
+  --mdc-outlined-text-field-label-text-color: var(--text-muted);
+  --mdc-outlined-text-field-input-text-color: var(--text-primary);
+}
+
+.mdc-dialog__surface {
+  background: var(--bg-panel-raised) !important;
+  color: var(--text-primary) !important;
+}
+
+.mat-mdc-select-panel {
+  background: var(--bg-panel-raised) !important;
+}

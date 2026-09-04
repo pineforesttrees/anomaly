@@ -1,0 +1,55 @@
+<h2 mat-dialog-title>Control limits &middot; Product {{ data.productCode }}</h2>
+
+<form [formGroup]="form" (ngSubmit)="save()">
+  <mat-dialog-content>
+    <div class="field-row">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Upper control limit</mat-label>
+        <input matInput type="number" formControlName="upperControlLimit" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Lower control limit</mat-label>
+        <input matInput type="number" formControlName="lowerControlLimit" />
+        @if (form.controls.lowerControlLimit.hasError('mustBeBelowUcl')) {
+          <mat-error>Must be below the upper limit</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+      <mat-label>Center line (optional)</mat-label>
+      <input matInput type="number" formControlName="centerLine" />
+    </mat-form-field>
+
+    <div class="emails">
+      <label class="emails__label">Notify by email on breach</label>
+      <mat-chip-set>
+        @for (email of emails; track email) {
+          <mat-chip (removed)="removeEmail(email)">
+            {{ email }}
+            <button matChipRemove aria-label="Remove email">
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </mat-chip>
+        }
+      </mat-chip-set>
+      <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+        <mat-label>Add email address</mat-label>
+        <input
+          matInput
+          type="email"
+          formControlName="newEmail"
+          (keydown.enter)="$event.preventDefault(); addEmail()"
+          placeholder="alerts@company.com" />
+        <button matSuffix mat-icon-button type="button" (click)="addEmail()" aria-label="Add email">
+          <mat-icon>add</mat-icon>
+        </button>
+      </mat-form-field>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="cancel()">Cancel</button>
+    <button mat-flat-button color="primary" type="submit">Save limits</button>
+  </mat-dialog-actions>
+</form>

@@ -1,0 +1,73 @@
+# Bitbucket Pipelines for the SPC dashboard.
+#
+# Before enabling this, set these as Repository variables
+# (Repository settings → Pipelines → Repository variables):
+#   AWS_ACCESS_KEY_ID       - IAM user/role with deploy permissions
+#   AWS_SECRET_ACCESS_KEY
+#   AWS_DEFAULT_REGION      - e.g. eu-central-1
+#   SES_SENDER_EMAIL        - must be a verified SES identity
+#
+# The backend deploy step is manual (requires a click in the Pipelines UI)
+# since it provisions/changes real AWS infrastructure.
+
+image: node:20
+
+definitions:
+  caches:
+    frontend-npm: frontend/node_modules
+    backend-npm: backend/node_modules
+
+pipelines:
+  default:
+    - step:
+        name: Build frontend
+        caches:
+          - frontend-npm
+        script:
+          - cd frontend
+          - npm ci
+          - npm run build -- --configuration production
+        artifacts:
+          - frontend/dist/**
+
+    - step:
+        name: Lint & typecheck backend
+        caches:
+          - backend-npm
+        script:
+          - cd backend
+          - npm ci
+          - npx tsc --noEmit
+
+  branches:
+    main:
+      - step:
+          name: Build frontend
+          caches:
+            - frontend-npm
+          script:
+            - cd frontend
+            - npm ci
+            - npm run build -- --configuration production
+          artifacts:
+            - frontend/dist/**
+
+      - step:
+          name: Typecheck backend
+          caches:
+            - backend-npm
+          script:
+            - cd backend
+            - npm ci
+            - npx tsc --noEmit
+
+      - step:
+          name: Deploy backend (manual)
+          trigger: manual
+          caches:
+            - backend-npm
+          script:
+            - cd backend
+            - npm ci
+            - npx serverless deploy --stage prod --region ${AWS_DEFAULT_REGION}
+              --param="SES_SENDER_EMAIL=${SES_SENDER_EMAIL}"

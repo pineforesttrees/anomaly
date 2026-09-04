@@ -1,0 +1,29 @@
+<section class="card">
+  <header class="card__header">
+    <div class="card__title">
+      <span class="status-dot" [class]="'status-dot--' + status"></span>
+      <h2>{{ productLabel }}</h2>
+    </div>
+    <button mat-icon-button aria-label="Configure control limits" (click)="openSettings()">
+      <mat-icon>tune</mat-icon>
+    </button>
+  </header>
+
+  <p class="card__status-label">
+    @switch (status) {
+      @case ('breach-high') { Above upper control limit }
+      @case ('breach-low') { Below lower control limit }
+      @default { Within control limits }
+    }
+  </p>
+
+  <div class="card__chart">
+    @if (loading) {
+      <div class="card__state">Loading&hellip;</div>
+    } @else if (loadError) {
+      <div class="card__state card__state--error">Couldn't load data from the API.</div>
+    } @else {
+      <canvas baseChart [data]="chartData" [options]="chartOptions" type="line"></canvas>
+    }
+  </div>
+</section>

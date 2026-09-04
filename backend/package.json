@@ -1,0 +1,22 @@
+{
+  "name": "spc-dashboard-api",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc -p .",
+    "deploy": "serverless deploy",
+    "logs:checker": "serverless logs -f checkBreaches -t"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.637.0",
+    "@aws-sdk/client-ses": "^3.637.0",
+    "@aws-sdk/lib-dynamodb": "^3.637.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.145",
+    "@types/node": "^20.14.0",
+    "serverless": "^3.39.0",
+    "serverless-esbuild": "^1.54.1",
+    "typescript": "~5.5.4"
+  }
+}

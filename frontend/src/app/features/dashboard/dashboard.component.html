@@ -1,0 +1,25 @@
+<header class="topbar">
+  <div class="topbar__identity">
+    <span class="topbar__mark">SPC</span>
+    <div>
+      <h1>Process control &mdash; Sales</h1>
+      <p class="topbar__subtitle">Products A&ndash;D &middot; live control limits</p>
+    </div>
+  </div>
+
+  <mat-button-toggle-group
+    class="timeframe-toggle"
+    [value]="timeframe()"
+    (change)="setTimeframe($event.value)"
+    aria-label="Chart timeframe">
+    @for (opt of timeframeOptions; track opt.value) {
+      <mat-button-toggle [value]="opt.value">{{ opt.label }}</mat-button-toggle>
+    }
+  </mat-button-toggle-group>
+</header>
+
+<main class="chart-grid">
+  @for (code of productCodes; track code) {
+    <app-control-chart [productCode]="code" [timeframe]="timeframe()"></app-control-chart>
+  }
+</main>

@@ -1,0 +1,120 @@
+service: spc-dashboard-api
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: ${opt:region, 'eu-central-1'}
+  stage: ${opt:stage, 'prod'}
+  environment:
+    SALES_TABLE: ${self:service}-${sls:stage}-sales-data
+    LIMITS_TABLE: ${self:service}-${sls:stage}-control-limits
+    NOTIFY_STATE_TABLE: ${self:service}-${sls:stage}-notify-state
+    SES_SENDER_EMAIL: ${env:SES_SENDER_EMAIL, 'alerts@yourdomain.com'}
+    ALLOWED_ORIGIN: ${env:ALLOWED_ORIGIN, '*'}
+  httpApi:
+    cors:
+      allowedOrigins:
+        - ${env:ALLOWED_ORIGIN, '*'}
+      allowedMethods:
+        - GET
+        - PUT
+        - OPTIONS
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:Query
+          Resource:
+            - !GetAtt SalesTable.Arn
+            - !Sub '${SalesTable.Arn}/index/*'
+            - !GetAtt LimitsTable.Arn
+            - !GetAtt NotifyStateTable.Arn
+        - Effect: Allow
+          Action:
+            - ses:SendEmail
+            - ses:SendRawEmail
+          Resource: '*'
+
+plugins:
+  - serverless-esbuild
+
+package:
+  individually: true
+
+functions:
+  getSeries:
+    handler: src/handlers/getSeries.handler
+    events:
+      - httpApi:
+          path: /products/{code}/series
+          method: get
+
+  getLimits:
+    handler: src/handlers/getLimits.handler
+    events:
+      - httpApi:
+          path: /products/{code}/limits
+          method: get
+
+  updateLimits:
+    handler: src/handlers/updateLimits.handler
+    events:
+      - httpApi:
+          path: /products/{code}/limits
+          method: put
+
+  # Polls the latest data point per product on a schedule and emails
+  # notifyEmails via SES the moment a value crosses UCL/LCL. Debounced with
+  # NotifyStateTable so it only alerts on state *change*, not every tick.
+  checkBreaches:
+    handler: src/handlers/checkBreaches.handler
+    events:
+      - schedule: rate(5 minutes)
+
+resources:
+  Resources:
+    SalesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.SALES_TABLE}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: productCode
+            AttributeType: S
+          - AttributeName: timestamp
+            AttributeType: S
+        KeySchema:
+          - AttributeName: productCode
+            KeyType: HASH
+          - AttributeName: timestamp
+            KeyType: RANGE
+
+    LimitsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.LIMITS_TABLE}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: productCode
+            AttributeType: S
+        KeySchema:
+          - AttributeName: productCode
+            KeyType: HASH
+
+    NotifyStateTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.NOTIFY_STATE_TABLE}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: productCode
+            AttributeType: S
+        KeySchema:
+          - AttributeName: productCode
+            KeyType: HASH

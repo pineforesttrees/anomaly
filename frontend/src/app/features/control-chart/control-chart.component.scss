@@ -1,0 +1,73 @@
+.card {
+  background: var(--bg-panel);
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px 12px;
+  display: flex;
+  flex-direction: column;
+  min-height: 280px;
+}
+
+.card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card__title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  h2 {
+    font-size: 15px;
+    color: var(--text-primary);
+  }
+}
+
+.card__header button {
+  color: var(--text-muted);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+
+  &--in-control {
+    background: var(--signal-cyan);
+    box-shadow: 0 0 0 4px var(--signal-cyan-dim);
+  }
+  &--breach-high,
+  &--breach-low {
+    background: var(--signal-red);
+    box-shadow: 0 0 0 4px var(--signal-red-dim);
+  }
+}
+
+.card__status-label {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--text-faint);
+}
+
+.card__chart {
+  position: relative;
+  flex: 1;
+  margin-top: 8px;
+  min-height: 180px;
+}
+
+.card__state {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--text-faint);
+  font-size: 13px;
+
+  &--error {
+    color: var(--signal-red);
+  }
+}
