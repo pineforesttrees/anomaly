@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>SPC dashboard &middot; preview</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: #060b1e;
+    background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(79,195,255,0.08), transparent);
+    font-family: 'Inter', -apple-system, sans-serif;
+    padding: 32px 24px 64px;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; }
+  .note {
+    color: #5b6aa0;
+    font-size: 12px;
+    text-align: center;
+    margin: 0 0 20px;
+  }
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    padding-bottom: 16px; border-bottom: 1px solid #1e2c56; margin-bottom: 20px;
+  }
+  .identity { display: flex; align-items: center; gap: 12px; }
+  .mark {
+    width: 36px; height: 36px; border-radius: 8px; background: rgba(79,195,255,0.14);
+    border: 1px solid rgba(79,195,255,0.35); display: flex; align-items: center; justify-content: center;
+    color: #4fc3ff; font-weight: 600; font-size: 12px; font-family: 'Space Grotesk', sans-serif;
+  }
+  .title { color: #e8ecfb; font-size: 16px; font-weight: 600; font-family: 'Space Grotesk', sans-serif; }
+  .subtitle { color: #8b9bd1; font-size: 12px; }
+  .toggle { display: flex; border: 1px solid #1e2c56; border-radius: 8px; overflow: hidden; }
+  .toggle span { padding: 6px 12px; font-size: 12px; color: #5b6aa0; }
+  .toggle span.active { background: rgba(79,195,255,0.16); color: #4fc3ff; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+  .card { background: #0d1836; border: 1px solid #1e2c56; border-radius: 12px; padding: 16px; }
+  .card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+  .card-id { display: flex; align-items: center; gap: 8px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .dot.ok { background: #4fc3ff; box-shadow: 0 0 0 4px rgba(79,195,255,0.18); }
+  .dot.bad { background: #ff5d78; box-shadow: 0 0 0 4px rgba(255,93,120,0.18); }
+  .card-name { color: #e8ecfb; font-size: 14px; font-weight: 600; }
+  .gear { color: #5b6aa0; font-size: 15px; }
+  .status { font-size: 12px; margin-bottom: 8px; }
+  .status.ok { color: #5b6aa0; }
+  .status.bad { color: #ff9fb0; }
+  svg { display: block; width: 100%; height: auto; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="note">Static preview &mdash; not connected to live data</p>
+
+  <div class="topbar">
+    <div class="identity">
+      <div class="mark">SPC</div>
+      <div>
+        <div class="title">Process control &middot; Sales</div>
+        <div class="subtitle">Products A&ndash;D</div>
+      </div>
+    </div>
+    <div class="toggle">
+      <span>1 day</span>
+      <span class="active">1 week</span>
+      <span>1 month</span>
+      <span>6 months</span>
+    </div>
+  </div>
+
+  <div class="grid">
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-id"><span class="dot ok"></span><span class="card-name">Product A</span></div>
+        <span class="gear">&#9881;</span>
+      </div>
+      <div class="status ok">Within control limits</div>
+      <svg viewBox="0 0 300 110">
+        <line x1="10" y1="24" x2="290" y2="24" stroke="#ff5d78" stroke-width="1" stroke-dasharray="5 4" opacity="0.55"/>
+        <text x="288" y="20" text-anchor="end" fill="#ff9fb0" font-size="9">UCL</text>
+        <line x1="10" y1="90" x2="290" y2="90" stroke="#ff5d78" stroke-width="1" stroke-dasharray="5 4" opacity="0.55"/>
+        <text x="288" y="102" text-anchor="end" fill="#ff9fb0" font-size="9">LCL</text>
+        <polyline points="10,58 45,50 80,62 115,45 150,55 185,40 220,58 255,48 290,52" fill="none" stroke="#4fc3ff" stroke-width="2"/>
+      </svg>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-id"><span class="dot ok"></span><span class="card-name">Product B</span></div>
+        <span class="gear">&#9881;</span>
+      </div>
+      <div class="status ok">Within control limits</div>
+      <svg viewBox="0 0 300 110">
+        <line x1="10" y1="20" x2="290" y2="20" stroke="#ff5d78" stroke-width="1" stroke-dasharray="5 4" opacity="0.55"/>
+        <text x="288" y="16" text-anchor="end" fill="#ff9fb0" font-size="9">UCL</text>
+        <line x1="10" y1="88" x2="290" y2="88" stroke="#ff5d78" stroke-width="1" stroke-dasharray="5 4" opacity="0.55"/>
+        <text x="288" y="100" text-anchor="end" fill="#ff9fb0" font-size="9">LCL</text>
+        <polyline points="10,60 45,66 80,50 115,60 150,68 185,55 220,45 255,60 290,50" fill="none" stroke="#4fc3ff" stroke-width="2"/>
+      </svg>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-id"><span class="dot bad"></span><span class="card-name">Product C</span></div>
+        <span class="gear">&#9881;</span>
+      </div>
+      <div class="status bad">Above upper control limit</div>
+      <svg viewBox="0 0 300 110">
+        <line x1="10" y1="30" x2="290" y2="30" stroke="#ff5d78" stroke-width="1" stroke-dasharray="5 4" opacity="0.55"/>
+        <text x="288" y="26" text-anchor="end" fill="#ff9fb0" font-size="9">UCL</text>
+        <line x1="10" y1="90" x2="290" y2="90" stroke="#ff5d78" stroke-width="1" stroke-dasharray="5 4" opacity="0.55"/>
+        <text x="288" y="102" text-anchor="end" fill="#ff9fb0" font-size="9">LCL</text>
+        <polyline points="10,60 60,55 110,50 160,40 205,25 240,14 290,10" fill="none" stroke="#ff5d78" stroke-width="2"/>
+      </svg>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-id"><span class="dot ok"></span><span class="card-name">Product D</span></div>
+        <span class="gear">&#9881;</span>
+      </div>
+      <div class="status ok">Within control limits</div>
+      <svg viewBox="0 0 300 110">
+        <line x1="10" y1="22" x2="290" y2="22" stroke="#ff5d78" stroke-width="1" stroke-dasharray="5 4" opacity="0.55"/>
+        <text x="288" y="18" text-anchor="end" fill="#ff9fb0" font-size="9">UCL</text>
+        <line x1="10" y1="86" x2="290" y2="86" stroke="#ff5d78" stroke-width="1" stroke-dasharray="5 4" opacity="0.55"/>
+        <text x="288" y="98" text-anchor="end" fill="#ff9fb0" font-size="9">LCL</text>
+        <polyline points="10,50 45,58 80,45 115,52 150,60 185,48 220,55 255,44 290,56" fill="none" stroke="#4fc3ff" stroke-width="2"/>
+      </svg>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>
