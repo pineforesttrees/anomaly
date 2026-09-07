@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>SPC dashboard &middot; preview</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: #060b1e;
+    background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(79,195,255,0.08), transparent);
+    font-family: 'Inter', -apple-system, sans-serif;
+    padding: 32px 24px 64px;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; position: relative; }
+  .note { color: #5b6aa0; font-size: 12px; text-align: center; margin: 0 0 20px; }
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    padding-bottom: 16px; border-bottom: 1px solid #1e2c56; margin-bottom: 20px;
+  }
+  .identity { display: flex; align-items: center; gap: 12px; }
+  .mark {
+    width: 36px; height: 36px; border-radius: 8px; background: rgba(79,195,255,0.14);
+    border: 1px solid rgba(79,195,255,0.35); display: flex; align-items: center; justify-content: center;
+    color: #4fc3ff; font-weight: 600; font-size: 12px; font-family: 'Space Grotesk', sans-serif;
+  }
+  .title { color: #e8ecfb; font-size: 16px; font-weight: 600; font-family: 'Space Grotesk', sans-serif; }
+  .subtitle { color: #8b9bd1; font-size: 12px; }
+  #tf-toggle { display: flex; border: 1px solid #1e2c56; border-radius: 8px; overflow: hidden; }
+  .tf-pill { padding: 6px 12px; font-size: 12px; cursor: pointer; color: #5b6aa0; }
+  .tf-pill.active { background: rgba(79,195,255,0.16); color: #4fc3ff; }
+  #grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 640px) { #grid { grid-template-columns: 1fr; } }
+  .card { background: #0d1836; border: 1px solid #1e2c56; border-radius: 12px; padding: 16px; }
+  .card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+  .card-id { display: flex; align-items: center; gap: 8px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .card-name { color: #e8ecfb; font-size: 14px; font-weight: 600; }
+  .gear { background: none; border: none; color: #5b6aa0; font-size: 15px; cursor: pointer; line-height: 1; padding: 2px; }
+  .status { font-size: 12px; margin-bottom: 8px; }
+  svg { display: block; width: 100%; height: auto; }
+  #backdrop {
+    display: none; position: fixed; inset: 0; background: rgba(6,11,30,0.72);
+    align-items: center; justify-content: center; padding: 20px; z-index: 10;
+  }
+  #modal { background: #132145; border: 1px solid #2c3d70; border-radius: 14px; padding: 22px; width: 280px; max-width: 100%; }
+  #modal .modal-title { color: #e8ecfb; font-size: 15px; font-weight: 600; margin-bottom: 14px; }
+  #modal label { display: block; color: #8b9bd1; font-size: 11px; margin-bottom: 4px; }
+  #modal input {
+    width: 100%; box-sizing: border-box; background: #0d1836; border: 1px solid #2c3d70;
+    border-radius: 8px; color: #e8ecfb; padding: 8px 10px; font-size: 13px; margin-bottom: 12px;
+  }
+  #modal-error { color: #ff9fb0; font-size: 11px; min-height: 14px; margin-bottom: 10px; }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
+  .btn-cancel { background: transparent; border: 1px solid #2c3d70; color: #8b9bd1; border-radius: 8px; padding: 7px 14px; font-size: 12px; cursor: pointer; }
+  .btn-save { background: #4fc3ff; border: none; color: #04101f; border-radius: 8px; padding: 7px 14px; font-size: 12px; font-weight: 600; cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="note">Static preview with dummy data &mdash; click a timeframe or a gear icon to edit limits</p>
+
+  <div class="topbar">
+    <div class="identity">
+      <div class="mark">SPC</div>
+      <div>
+        <div class="title">Process control &middot; Sales</div>
+        <div class="subtitle">Products A&ndash;D</div>
+      </div>
+    </div>
+    <div id="tf-toggle"></div>
+  </div>
+
+  <div id="grid"></div>
+
+  <div id="backdrop">
+    <div id="modal">
+      <div class="modal-title" id="modal-title">Control limits</div>
+      <label for="in-ucl">Upper control limit</label>
+      <input id="in-ucl" type="number" />
+      <label for="in-lcl">Lower control limit</label>
+      <input id="in-lcl" type="number" />
+      <div id="modal-error"></div>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="btn-cancel">Cancel</button>
+        <button class="btn-save" id="btn-save">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var TIMEFRAMES = [
+    { key: '1d', label: '1 Day' },
+    { key: '1w', label: '1 Week' },
+    { key: '1m', label: '1 Month' },
+    { key: '6m', label: '6 Months' }
+  ];
+  var currentTF = '1w';
+
+  // Dummy series per timeframe per product. Limits (ucl/lcl) live per
+  // product only, independent of timeframe, matching the real app.
+  var SERIES = {
+    '1d': { A:[55,60,52,58,50,56,60,54], B:[58,52,62,55,60,50,58,53], C:[60,68,74,80,86,90,95,101], D:[52,58,50,55,48,60,54,58] },
+    '1w': { A:[58,50,64,48,55,40,57,46,50], B:[55,62,45,56,64,50,40,56,46], C:[45,50,56,63,72,80,88,94,99], D:[50,58,45,52,60,48,55,44,56] },
+    '1m': { A:[52,58,46,60,50,55,42,58,48,53], B:[60,50,65,55,48,62,52,58,45,56], C:[50,55,60,66,72,78,84,90,95,99], D:[48,55,60,45,52,58,50,44,60,15] },
+    '6m': { A:[55,50,58,52,60,48,56,50], B:[60,55,50,58,62,54,48,56], C:[58,62,55,60,65,58,62,56], D:[50,55,48,60,52,58,45,55] }
+  };
+  var LIMITS = {
+    A: { ucl: 80, lcl: 25 },
+    B: { ucl: 78, lcl: 22 },
+    C: { ucl: 78, lcl: 25 },
+    D: { ucl: 82, lcl: 20 }
+  };
+  var codes = ['A', 'B', 'C', 'D'];
+  var grid = document.getElementById('grid');
+  var tfToggle = document.getElementById('tf-toggle');
+
+  function valueToY(v) {
+    var y = 100 - v * 0.9;
+    return Math.max(6, Math.min(104, y));
+  }
+
+  function tfPillHTML(tf) {
+    var activeClass = tf.key === currentTF ? ' active' : '';
+    return '<span data-tf="' + tf.key + '" class="tf-pill' + activeClass + '">' + tf.label + '</span>';
+  }
+
+  function renderToggle() {
+    tfToggle.innerHTML = TIMEFRAMES.map(tfPillHTML).join('');
+  }
+
+  function cardHTML(code) {
+    return (
+      '<div class="card">' +
+        '<div class="card-head">' +
+          '<div class="card-id">' +
+            '<span class="dot" id="dot-' + code + '"></span>' +
+            '<span class="card-name">Product ' + code + '</span>' +
+          '</div>' +
+          '<button class="gear" data-code="' + code + '">&#9881;</button>' +
+        '</div>' +
+        '<div class="status" id="status-' + code + '"></div>' +
+        '<svg viewBox="0 0 300 110">' +
+          '<line id="uclline-' + code + '" x1="10" x2="290" stroke="#ff5d78" stroke-width="1" stroke-dasharray="5 4" opacity="0.55"/>' +
+          '<text id="ucltext-' + code + '" x="288" text-anchor="end" fill="#ff9fb0" font-size="9">UCL</text>' +
+          '<line id="lclline-' + code + '" x1="10" x2="290" stroke="#ff5d78" stroke-width="1" stroke-dasharray="5 4" opacity="0.55"/>' +
+          '<text id="lcltext-' + code + '" x="288" text-anchor="end" fill="#ff9fb0" font-size="9">LCL</text>' +
+          '<polyline id="line-' + code + '" fill="none" stroke-width="2"/>' +
+        '</svg>' +
+      '</div>'
+    );
+  }
+
+  grid.innerHTML = codes.map(cardHTML).join('');
+  renderToggle();
+
+  function render(code) {
+    var values = SERIES[currentTF][code];
+    var lim = LIMITS[code];
+    var n = values.length;
+    var pts = values.map(function (v, i) {
+      var x = 10 + i * (280 / (n - 1));
+      return x.toFixed(1) + ',' + valueToY(v).toFixed(1);
+    }).join(' ');
+
+    var last = values[n - 1];
+    var status = (last > lim.ucl || last < lim.lcl) ? 'bad' : 'ok';
+    var color = status === 'ok' ? '#4fc3ff' : '#ff5d78';
+
+    document.getElementById('line-' + code).setAttribute('points', pts);
+    document.getElementById('line-' + code).setAttribute('stroke', color);
+
+    var uY = valueToY(lim.ucl), lY = valueToY(lim.lcl);
+    document.getElementById('uclline-' + code).setAttribute('y1', uY);
+    document.getElementById('uclline-' + code).setAttribute('y2', uY);
+    document.getElementById('ucltext-' + code).setAttribute('y', uY - 4);
+    document.getElementById('lclline-' + code).setAttribute('y1', lY);
+    document.getElementById('lclline-' + code).setAttribute('y2', lY);
+    document.getElementById('lcltext-' + code).setAttribute('y', lY + 12);
+
+    var dot = document.getElementById('dot-' + code);
+    dot.style.background = color;
+    dot.style.boxShadow = '0 0 0 4px ' + (status === 'ok' ? 'rgba(79,195,255,0.18)' : 'rgba(255,93,120,0.18)');
+
+    var st = document.getElementById('status-' + code);
+    st.style.color = status === 'ok' ? '#5b6aa0' : '#ff9fb0';
+    st.textContent = last > lim.ucl ? 'Above upper control limit' : (last < lim.lcl ? 'Below lower control limit' : 'Within control limits');
+  }
+
+  function renderAll() {
+    codes.forEach(render);
+  }
+
+  renderAll();
+
+  tfToggle.addEventListener('click', function (e) {
+    var pill = e.target.closest('.tf-pill');
+    if (!pill) return;
+    currentTF = pill.getAttribute('data-tf');
+    renderToggle();
+    renderAll();
+  });
+
+  var backdrop = document.getElementById('backdrop');
+  var titleEl = document.getElementById('modal-title');
+  var inUcl = document.getElementById('in-ucl');
+  var inLcl = document.getElementById('in-lcl');
+  var err = document.getElementById('modal-error');
+  var activeCode = null;
+
+  grid.addEventListener('click', function (e) {
+    var btn = e.target.closest('.gear');
+    if (!btn) return;
+    activeCode = btn.getAttribute('data-code');
+    titleEl.textContent = 'Control limits \u00b7 Product ' + activeCode;
+    inUcl.value = LIMITS[activeCode].ucl;
+    inLcl.value = LIMITS[activeCode].lcl;
+    err.textContent = '';
+    backdrop.style.display = 'flex';
+  });
+
+  document.getElementById('btn-cancel').addEventListener('click', function () {
+    backdrop.style.display = 'none';
+  });
+
+  document.getElementById('btn-save').addEventListener('click', function () {
+    var u = parseFloat(inUcl.value), l = parseFloat(inLcl.value);
+    if (isNaN(u) || isNaN(l)) { err.textContent = 'Enter numbers for both limits.'; return; }
+    if (l >= u) { err.textContent = 'Lower limit must be less than upper limit.'; return; }
+    LIMITS[activeCode].ucl = u;
+    LIMITS[activeCode].lcl = l;
+    render(activeCode);
+    backdrop.style.display = 'none';
+  });
+
+  backdrop.addEventListener('click', function (e) {
+    if (e.target === backdrop) backdrop.style.display = 'none';
+  });
+})();
+</script>
+</body>
+</html>
